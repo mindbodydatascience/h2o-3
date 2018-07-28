@@ -1211,15 +1211,15 @@ public class NewChunk extends Chunk {
     boolean floatOverflow = false;
     double min = Double.POSITIVE_INFINITY;
     double max = Double.NEGATIVE_INFINITY;
-    Long min_l = Long.MAX_VALUE;
-    Long max_l = Long.MIN_VALUE;
+    long min_l = Long.MAX_VALUE;
+    long max_l = Long.MIN_VALUE;
     double longMax = (double) Long.MAX_VALUE;
     double longMin = (double) Long.MIN_VALUE;
     int p10iLength = PrettyPrint.powers10i.length;
     long llo=Long   .MAX_VALUE, lhi=Long   .MIN_VALUE;
     int  xlo=Integer.MAX_VALUE, xhi=Integer.MIN_VALUE;
     boolean hasZero = sparse;
-    Long ll;
+    long ll;
     for(int i = 0; i< _sparseLen; i++ ) {
       if( isNA2(i) ) continue;
       long l = _ms.get(i);
@@ -1234,24 +1234,17 @@ public class NewChunk extends Chunk {
         hasZero = true;
         continue;
       }
+
       if (isInteger)  // once set to false don't want to reset back to true
         isInteger = (x>=0) && (d<=longMax) && (d>=longMin);
 
       if (isInteger) {
-        ll = l* (long) Math.pow(10, x); // only perform operation if still fit in Long and still integer
+        ll = l*PrettyPrint.pow10i(x); // only perform operation if still fit in Long and still integer
         if( ll<min_l ) { min = d; min_l=ll; llo=l; xlo=x; } //
         if( ll>max_l ) { max = d; max_l=ll; lhi=l; xhi=x; }
       } else {
-        if (d < min) {
-          min = d;
-          llo = l;
-          xlo = x;
-        }
-        if (d > max) {
-          max=d;
-          lhi=l;
-          xhi=x;
-        }
+        if (d < min) { min = d; llo = l; xlo = x; }
+        if (d > max) { max=d; lhi=l; xhi=x; }
       }
 
       floatOverflow = l < Integer.MIN_VALUE+1 || l > Integer.MAX_VALUE;
@@ -1267,7 +1260,7 @@ public class NewChunk extends Chunk {
     if(!hasNonZero) xlo = xhi = xmin = 0;
 
     // Constant column?
-    if( _naCnt==0 && (min_l.compareTo(max_l)==0) && xmin >=0 && isInteger) {
+    if( _naCnt==0 && (min_l==max_l) && xmin >=0 && isInteger) {
       return new C0LChunk(min_l, _len);
     }
     if( _naCnt==0 && (min==max) && (xmin<0 || !isInteger) ) {
